@@ -45,12 +45,19 @@
     $(function(){
 		var socket = io.connect(document.URL);
 
-		$("#sair").click(sair);
-
-		var sair = function(event){
-			event.preventDefault();
+		$("#sair").click(function(event){
+			console.log("Cliquei no botao Sair");
 			socket.emit("sair");
-		};
+			event.preventDefault();
+			$(location).attr('href',document.URL);
+		});
+/*
+		var sair = function(event){
+			
+			console.log("Cliquei no botao Sair");
+			socket.emit("sair");
+			event.preventDefault();
+		};*/
 
 		$("#novo-malandro").submit(function(event){
 			event.preventDefault();
