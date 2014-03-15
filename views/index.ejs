@@ -26,7 +26,8 @@
 	   		</textarea>
 	    	
 	    	<form id="formMessage">
-		    	<input type="text" id="message" size="70">
+	    		<a href="" id="sair">Sair</a>
+		    	<input type="text" id="message" size="67">
 		    	<input type="submit" value="Enviar">
 	    	</form>
     	</div>
@@ -43,6 +44,13 @@
     <script>
     $(function(){
 		var socket = io.connect(document.URL);
+
+		$("#sair").click(sair);
+
+		var sair = function(event){
+			event.preventDefault();
+			socket.emit("sair");
+		};
 
 		$("#novo-malandro").submit(function(event){
 			event.preventDefault();
@@ -74,7 +82,7 @@
 			event.preventDefault();
 		});
 
-		
+				
 
 		socket.on("mensagens-para-todos", function(mensagem){
 			console.log("chat.ejs: " + mensagem);

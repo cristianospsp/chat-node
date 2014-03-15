@@ -51,11 +51,38 @@ io.set("polling duration", 10);
 io.on("connection", function(socketClient){
 	console.log("Novo Cliente Conectado...");
 
+	socketClient.on("disconnect", function(){
+		console.log("Alguem saiu da pagina");
+		desconectaMalandro();
+	});
+
+	var desconectaMalandro = function(){
+
+		socketClient.get("nomeMalandroLogado", function(error, nomeMalandroLogado){
+			var logado = (nomeMalandroLogado !== undefined);
+			if (logado) {
+				console.log("Desconectando usuario " + nomeMalandroLogado);
+				for (var i=0; i < malandros_logados.length; i++) {
+					if (malandros_logados[i] == nomeMalandroLogado) {
+						malandros_logados.splice(i, 1);
+						break;		
+					}
+				}
+				socketClient.broadcast.emit("mostra-malandro", malandros_logados);
+			}
+		});
+
+	};
+
 	socketClient.on("mensagem", function(mensagem){
 		console.log("Autor: " + mensagem.autor + " - Mensagem : " + mensagem.message);
 		socketClient.emit("mensagens-para-todos", mensagem);
 		socketClient.broadcast.emit("mensagens-para-todos", mensagem);			
 	});
+
+	socketClient.on("sair", function(){
+		desconectaMalandro();
+	}); 
 
 	socketClient.on("novo-malandro", function(nome){
 		console.log("Novo Malandro: " + nome);
@@ -67,10 +94,13 @@ io.on("connection", function(socketClient){
 				break;		
 			}
 		}
+
 		if (!achou) {
 			malandros_logados[malandros_logados.length] = nome;
+			socketClient.set("nomeMalandroLogado", nome);
+			malandros_logados.sort();
 		}
-		
+
 		socketClient.emit("mostra-malandro", malandros_logados);
 		socketClient.broadcast.emit("mostra-malandro", malandros_logados);			
 	});
