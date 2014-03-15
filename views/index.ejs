@@ -5,7 +5,95 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+  	
+    <div id="form-malandu">
+    	<form id="novo-malandro">
+	    	<input id="nome" type="text" placeholder="Nome do Malandro..." >
+	    	<input type="submit" value="Entrar" >
+	    </form>
+    
+	<div id="mss">
+    </div>
+    </div>
+	
+    <div id="malandro">
+
+    </div>    
+
+	<div id="mensagens" style="display: none;">
+    	<div style="float: left;">
+	    	<textarea id="todasMensagens" cols="80" rows="15" disabled="disabled">
+	   		</textarea>
+	    	
+	    	<form id="formMessage">
+		    	<input type="text" id="message" size="70">
+		    	<input type="submit" value="Enviar">
+	    	</form>
+    	</div>
+    	<div id="divLogados" class="logados borda1">
+    		<span>Malanduix Logaduix nu momentu...</span>
+    		<ul id="logados" ></ul>
+    	</div>
+    </div>
+
+
+
+    <script src="/javascripts/jquery-2.1.0.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+    <script>
+    $(function(){
+		var socket = io.connect(document.URL);
+
+		$("#novo-malandro").submit(function(event){
+			event.preventDefault();
+			var nome = $("#nome").val();
+			if (nome.trim().length <= 3) {
+				var div = $("#mss");
+				div.html("Nome do malndro deve ter ki 3 xaracs....");
+				
+			}else{
+				$("#malandro").html(" tu foi ricunhicidu como malandu: <span id='nomeMalandu'>" + nome + "</span>");
+				$("#form-malandu").hide();
+				$("#mensagens").show();
+				socket.emit("novo-malandro", nome);
+			}
+
+		});
+
+		$("#formMessage").submit(function(event){
+			var message = $("#message").val();
+			var nome = $("#nomeMalandu").text();
+			var mensagens = {
+				"autor" : nome,
+				"message" : message
+			};
+
+			console.log(mensagens);
+			socket.emit("mensagem", mensagens);
+			$("#message").val("");
+			event.preventDefault();
+		});
+
+		
+
+		socket.on("mensagens-para-todos", function(mensagem){
+			console.log("chat.ejs: " + mensagem);
+			var conteudo = mensagem.autor + " : " + mensagem.message;
+			var conversas = $("#todasMensagens").val() + " \n " + conteudo;
+			$("#todasMensagens").val(conversas);
+		});
+
+		socket.on("mostra-malandro", function(malandros_logados){
+			console.log("clienteSide - malandros: " + malandros_logados);
+			$("#logados").html("");
+			$(malandros_logados).each(function(i, nome){
+				$("#logados").append("<li>" + nome + "</li>");
+			});
+			
+		});
+
+    });
+
+    </script>
+   </body>
 </html>
